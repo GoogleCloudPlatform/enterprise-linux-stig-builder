@@ -1,0 +1,74 @@
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Create a GCE Instance using the custom image created by packer, then
+# install OpenSCAP to produce a compliance evaluation report.
+steps:
+- name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
+  entrypoint: 'gcloud'
+  args:
+  - 'compute'
+  - 'instances'
+  - 'create'
+  - '$_INSTANCE_NAME'
+  - '--project=$_PROJECT_ID'
+  - '--zone=$_ZONE'
+  - '--machine-type=n2-standard-2'
+  - '--network-interface=stack-type=IPV4_ONLY,subnet=default,no-address'
+  - '--maintenance-policy=MIGRATE'
+  - '--provisioning-model=STANDARD'
+  - '--service-account=$_PROJECT_NUMBER-compute@developer.gserviceaccount.com'
+  - '--scopes=https://www.googleapis.com/auth/cloud-platform'
+  - '--create-disk=auto-delete=yes,boot=yes,device-name=$_INSTANCE_NAME,image=projects/$_PROJECT_ID/global/images/$_IMAGE_NAME,mode=rw,size=100,type=projects/$_PROJECT_ID/zones/$_ZONE/diskTypes/pd-balanced'
+  - '--no-shielded-secure-boot'
+  - '--shielded-vtpm'
+  - '--shielded-integrity-monitoring'
+  - '--labels=goog-ec-src=vm_add-gcloud'
+  - '--reservation-affinity=any'
+- name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
+  args:
+  - ls
+- name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
+  args:
+  - sleep
+  - '120'
+- name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
+  entrypoint: 'gcloud'
+  args:
+  - compute
+  - scp
+  - stig-evaluate.sh
+  - packer@$_INSTANCE_NAME:/tmp/
+  - --zone=$_ZONE
+  - --tunnel-through-iap
+- name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
+  entrypoint: 'gcloud'
+  args:
+  - compute
+  - ssh
+  - packer@$_INSTANCE_NAME
+  - --command=export IMAGE_NAME="$_IMAGE_NAME" BUCKET="$_BUCKET" && bash /tmp/stig-evaluate.sh
+  - --zone=$_ZONE
+  - --tunnel-through-iap
+  - --
+  - -t
+- name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
+  entrypoint: 'gcloud'
+  args:
+  - compute
+  - instances
+  - delete
+  - $_INSTANCE_NAME
+  - --zone=$_ZONE
+tags: ['rhel-evalute']
