@@ -13,13 +13,15 @@
 # limitations under the License.
 
 # Original Source: https://github.com/GoogleCloudPlatform/cloud-builders-community/tree/master/packer/examples/gce
-FROM alpine:3.18 AS build
+FROM debian AS build
 
 ARG PACKER_VERSION
 ARG PACKER_VERSION_SHA256SUM
 
 COPY packer_${PACKER_VERSION}_linux_amd64.zip .
 RUN echo "${PACKER_VERSION_SHA256SUM}  packer_${PACKER_VERSION}_linux_amd64.zip" > checksum && sha256sum -c checksum
+
+RUN apt-get -y update && apt-get -y install unzip
 
 RUN /usr/bin/unzip packer_${PACKER_VERSION}_linux_amd64.zip
 
