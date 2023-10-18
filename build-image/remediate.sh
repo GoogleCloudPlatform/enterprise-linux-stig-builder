@@ -18,11 +18,11 @@ set -x
 
 # retrieve the lockdown script that was generated in
 # the `generate-lockdown-script` step
-gsutil cp "gs://${BUCKET}/${IMAGE_NAME}/disa-stig.sh" disa-stig.sh
+gsutil cp "gs://${BUCKET}/${IMAGE_NAME}/disa-stig.sh" /root/disa-stig.sh
 
 # DISA STIG script will output to stderr and report some failures for 
 #  some individual fixes. The `|| true` will allow the lockdown to continue
-bash disa-stig.sh 2>&1 || true
+bash /root/disa-stig.sh 2>&1 || true
 
 
 # Fix /boot/efi mount options
