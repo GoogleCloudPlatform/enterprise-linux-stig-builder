@@ -15,7 +15,7 @@
 packer {
   required_plugins {
     googlecompute = {
-      version = ">= 1.1.1"
+      version = "= 1.1.1"
       source  = "github.com/hashicorp/googlecompute"
     }
   }
@@ -61,6 +61,11 @@ source "googlecompute" "rhel-image" {
   enable_secure_boot          = true
   enable_integrity_monitoring = true
   enable_vtpm                 = true
+  scopes                      = [
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/compute",
+    "https://www.googleapis.com/auth/devstorage.full_control"
+  ]
 }
 
 build {
