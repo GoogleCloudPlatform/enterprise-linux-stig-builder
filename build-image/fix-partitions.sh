@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcloud compute disks resize packer-rhel --size=100GB  --zone=us-central1-c -q 2>&1
+gcloud compute disks resize packer-rhel --size=160GB  --zone=us-central1-c -q 2>&1
 
 sudo yum install -y rsync
 sudo yum clean all
@@ -26,7 +26,7 @@ sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | sudo fdisk /dev/sda 2>&1
   n # new partition
     # default partition number (4)
     # default, start immediately after preceding partition
-  +10G  # 10 GB /var/log partition
+  +40G  # 40 GB /var/log partition
   n # new partition
     # default partition number (5)
     # default, start immediately after preceding partition
@@ -45,6 +45,10 @@ sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | sudo fdisk /dev/sda 2>&1
   +5G  # 5 GB /tmp partition
   n # new partition
     # default partition number (9)
+    # default, start immediately after preceding partition
+  +30G  # 30 GB /opt partition
+  n # new partition
+    # default partition number (10)
     # default, start immediately after preceding partition
     # default, use rest of the disk (20G)
   w # write the partition table
@@ -84,9 +88,16 @@ cd /
 sudo rsync -aAX tmp/ /mnt
 sudo umount /mnt
 
-# create /home
+# create /opt
 sudo mkfs.xfs /dev/sda9
 sudo mount /dev/sda9 /mnt
+cd /
+sudo rsync -aAX opt/ /mnt
+sudo umount /mnt
+
+# create /home
+sudo mkfs.xfs /dev/sda10
+sudo mount /dev/sda10 /mnt
 cd /
 sudo rsync -aAX home/ /mnt
 sudo umount /mnt
@@ -99,7 +110,8 @@ echo -e "UUID=$(lsblk -no UUID /dev/sda5)\t/var/log/audit\txfs\tdefaults\t0 0" |
 echo -e "UUID=$(lsblk -no UUID /dev/sda6)\t/var/tmp\txfs\tdefaults\t0 0" | sudo tee -a /etc/fstab
 echo -e "UUID=$(lsblk -no UUID /dev/sda7)\t/usr\txfs\tdefaults\t0 0" | sudo tee -a /etc/fstab
 echo -e "UUID=$(lsblk -no UUID /dev/sda8)\t/tmp\txfs\tdefaults\t0 0" | sudo tee -a /etc/fstab
-echo -e "UUID=$(lsblk -no UUID /dev/sda9)\t/home\txfs\tdefaults\t0 0" | sudo tee -a /etc/fstab
+echo -e "UUID=$(lsblk -no UUID /dev/sda9)\t/opt\txfs\tdefaults\t0 0" | sudo tee -a /etc/fstab
+echo -e "UUID=$(lsblk -no UUID /dev/sda10)\t/home\txfs\tdefaults\t0 0" | sudo tee -a /etc/fstab
 sudo mount -a
 sudo systemctl daemon-reload
 
@@ -108,6 +120,7 @@ sudo mount --bind / /mnt
 sudo rm -rf /mnt/var/*
 sudo rm -rf /mnt/usr/*
 sudo rm -rf /mnt/home/*
+sudo rm -rf /mnt/opt/*
 sudo rm -rf /mnt/tmp/*
 sudo umount /mnt
 

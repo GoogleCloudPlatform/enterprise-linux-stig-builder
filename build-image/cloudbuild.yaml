@@ -21,6 +21,7 @@ steps:
 - name: 'gcr.io/$PROJECT_ID/packer'
   args:
   - init
+  - -upgrade
   - rhel.pkr.hcl
 - name: 'gcr.io/$PROJECT_ID/packer'
   args:

@@ -30,7 +30,7 @@ steps:
   - '--provisioning-model=STANDARD'
   - '--service-account=$_PROJECT_NUMBER-compute@developer.gserviceaccount.com'
   - '--scopes=https://www.googleapis.com/auth/cloud-platform'
-  - '--create-disk=auto-delete=yes,boot=yes,device-name=$_INSTANCE_NAME,image=projects/$_PROJECT_ID/global/images/$_IMAGE_NAME,mode=rw,size=100,type=projects/$_PROJECT_ID/zones/$_ZONE/diskTypes/pd-balanced'
+  - '--create-disk=auto-delete=yes,boot=yes,device-name=$_INSTANCE_NAME,image=projects/$_PROJECT_ID/global/images/$_IMAGE_NAME,mode=rw,size=160,type=projects/$_PROJECT_ID/zones/$_ZONE/diskTypes/pd-balanced'
   - '--no-shielded-secure-boot'
   - '--shielded-vtpm'
   - '--shielded-integrity-monitoring'
