@@ -41,5 +41,5 @@ sudo oscap xccdf eval --report poststig-disa-scan.html \
 
 
 # Upload results
-sudo gsutil cp poststig-disa-scan.html "gs://${BUCKET}/${IMAGE_NAME}/"
-sudo gsutil cp poststig-disa-scan.xml "gs://${BUCKET}/${IMAGE_NAME}/"
+sudo gcloud storage cp poststig-disa-scan.html "gs://${BUCKET}/${IMAGE_NAME}/"
+sudo gcloud storage cp poststig-disa-scan.xml "gs://${BUCKET}/${IMAGE_NAME}/"
