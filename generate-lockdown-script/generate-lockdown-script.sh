@@ -39,4 +39,4 @@ sudo oscap xccdf generate fix \
   /usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml > disa-stig.sh
 
 
-sudo gsutil cp disa-stig.sh "gs://${BUCKET}/${IMAGE_NAME}/"
+sudo gcloud storage cp disa-stig.sh "gs://${BUCKET}/${IMAGE_NAME}/"
